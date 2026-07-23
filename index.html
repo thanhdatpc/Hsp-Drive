@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hsp Drive - Desktop Application</title>
+    <style>
+        /* =========================================
+           1. THIẾT LẬP CƠ BẢN DÀNH CHO NATIVE DESKTOP APP
+           ========================================= */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0b0f0c;
+            color: #ffffff;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden { display: none !important; }
+
+        /* =========================================
+           2. KHU VỰC ĐĂNG NHẬP / TẠO MỤC ĐĂNG KÝ MỚI
+           ========================================= */
+        #authSection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: radial-gradient(circle at 50% 50%, #112619 0%, #080c09 70%, #000000 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 99999;
+        }
+        .auth-box {
+            background-color: #121613;
+            padding: 35px 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 25px rgba(39, 174, 96, 0.2);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 22px;
+            background-color: #0b0f0c;
+            padding: 5px;
+            border-radius: 10px;
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+        .auth-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .auth-tab-btn:hover {
+            color: #fff;
+        }
+        .auth-tab-btn.active {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+        }
+        .auth-box h2 {
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px #fff, 0 0 15px #27ae60;
+            margin-bottom: 25px;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            color: rgba(39, 174, 96, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px;
+            background-color: #1a221c;
+            color: #ffffff;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 12px rgba(39, 174, 96, 0.6);
+        }
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            margin-top: 10px;
+        }
+        .auth-btn:hover {
+            box-shadow: 0 6px 25px rgba(39, 174, 96, 0.7);
+            transform: translateY(-2px);
+        }
+        .toggle-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: #3498db;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-link:hover { text-decoration: underline; color: #5adeff; }
+
+        /* =========================================
+           3. NATIVE DESKTOP APPLICATION LAYOUT
+           ========================================= */
+        #appSection {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background-color: #0d120e;
+        }
+
+        /* THANH TIÊU ĐỀ & NÚT MENU CỦA NATIVE DESKTOP APP */
+        .desktop-app-header {
+            height: 46px;
+            background-color: #141b16;
+            border-bottom: 1px solid rgba(39, 174, 96, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            -webkit-app-region: drag;
+        }
+        .app-brand-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            -webkit-app-region: no-drag;
+        }
+        .app-logo {
+            font-size: 17px;
+            font-weight: bold;
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+            letter-spacing: 0.5px;
+        }
+        .app-menu-bar {
+            display: flex;
+            gap: 2px;
+        }
+        .menu-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #bbb;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.2s;
+            position: relative;
+        }
+        .menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .dropdown-content {
+            position: absolute;
+            top: 34px;
+            left: 0;
+            background-color: #1a221d;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+            border-radius: 8px;
+            padding: 6px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+            display: none;
+            z-index: 1000;
+        }
+        .menu-btn:hover .dropdown-content { display: block; }
+        .dropdown-item {
+            padding: 9px 16px;
+            font-size: 13px;
+            color: #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .header-center-search {
+            flex: 1;
+            max-width: 380px;
+            margin: 0 20px;
+            -webkit-app-region: no-drag;
+        }
+        .search-input-box {
+            width: 100%;
+            background-color: #1a221c;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 7px 15px;
+            color: #fff;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .search-input-box:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.4);
+        }
+
+        .header-user-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            -webkit-app-region: no-drag;
+        }
+        .user-greeting {
+            font-size: 13px;
+            color: #27ae60;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .download-app-btn {
+            background-color: rgba(39, 174, 96, 0.15);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.4);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .download-app-btn:hover {
+            background-color: #27ae60;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(39, 174, 96, 0.6);
+            transform: translateY(-1px);
+        }
+        .logout-app-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .logout-app-btn:hover { background-color: #c0392b; }
+
+        .window-system-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 10px;
+        }
+        .win-ctrl-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .win-ctrl-btn:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
+        .win-ctrl-btn.close:hover { background-color: #e74c3c; color: #fff; }
+
+        /* MINIMIZED STATE STYLING */
+        #appSection.app-minimized .desktop-app-body {
+            display: none !important;
+        }
+        #appSection.app-minimized {
+            height: 46px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+        .minimized-dock-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #141b16;
+            border: 1px solid #27ae60;
+            padding: 10px 24px;
+            border-radius: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(39, 174, 96, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            z-index: 99999;
+            animation: fadeIn 0.3s ease;
+        }
+        .minimized-dock-bar:hover {
+            background-color: #1c271e;
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        /* BODY WORKSPACE DÀNH CHO APP DESKTOP */
+        .desktop-app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* APP SIDEBAR NAVIGATION */
+        .app-sidebar {
+            width: 240px;
+            background-color: #121814;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 10px 10px;
+        }
+        .sidebar-item {
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #aaa;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #1c271e;
+            color: #27ae60;
+            box-shadow: inset 4px 0 0 #27ae60;
+            font-weight: bold;
+        }
+
+        /* DUNG LƯỢNG BỘ NHỚ LƯU TRỮ */
+        .storage-status-card {
+            background-color: #1a221c;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(39, 174, 96, 0.15);
+        }
+        .storage-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+        .storage-bar-bg {
+            height: 6px;
+            background-color: #0b0f0c;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .storage-bar-fill {
+            height: 100%;
+            width: 15%;
+            background-color: #27ae60;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        /* NỘI DUNG CHÍNH */
+        .app-main-view {
+            flex: 1;
+            padding: 35px 40px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, #132418 0%, #0d120e 45%);
+        }
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 20px;
+        }
+        .view-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .upload-file-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .upload-file-btn:hover {
+            box-shadow: 0 6px 25px rgba(39, 174, 96, 0.7);
+            transform: translateY(-2px);
+        }
+
+        /* GRID CHỨA FILE CARDS */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+        .file-card {
+            background-color: #141c16;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 22px 18px;
+            border-radius: 14px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .file-card:hover {
+            border-color: #27ae60;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 15px rgba(39, 174, 96, 0.2);
+        }
+        .file-icon { font-size: 52px; margin-bottom: 12px; }
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            word-break: break-all;
+            color: #eeeeee;
+            line-height: 1.35;
+        }
+        
+        .file-size-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 6px;
+            background-color: rgba(0,0,0,0.3);
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .file-size { font-size: 12px; color: #aaa; font-weight: 500; }
+        
+        .star-btn {
+            font-size: 17px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            line-height: 1;
+        }
+        .star-btn:hover { color: #ffca28; transform: scale(1.3); }
+        .star-btn.starred { color: #ffca28; text-shadow: 0 0 10px rgba(255, 202, 40, 0.9); }
+
+        .download-btn {
+            font-size: 16px;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            line-height: 1;
+        }
+        .download-btn:hover { color: #27ae60; transform: scale(1.25); text-shadow: 0 0 8px rgba(39, 174, 96, 0.8); }
+
+        .action-btns {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .file-card:hover .action-btns { opacity: 1; }
+        .card-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card-btn:hover { opacity: 0.9; transform: scale(1.05); }
+        .card-btn.restore-btn { background-color: #27ae60; }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #777;
+            background: #121814;
+            border-radius: 14px;
+            border: 1px dashed rgba(255,255,255,0.1);
+            font-size: 15px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+            font-weight: bold;
+            z-index: 100000;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================
+         KHU VỰC ĐĂNG NHẬP / TẠO MỤC ĐĂNG KÝ MỚI
+         ========================================= -->
+    <div id="authSection">
+        <div class="auth-box">
+            <h2 id="authTitle">Đăng Nhập</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label>Tên tài khoản</label>
+                    <input type="text" id="username" placeholder="Nhập tên tài khoản" required>
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu</label>
+                    <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+                </div>
+                <!-- Trường xác nhận mật khẩu khi Tạo mục Đăng Ký mới -->
+                <div class="form-group hidden" id="confirmPassGroup">
+                    <label>Xác nhận mật khẩu</label>
+                    <input type="password" id="confirm_password" placeholder="Nhập lại mật khẩu">
+                </div>
+                
+                <button type="submit" class="auth-btn" id="submitBtn">Đăng Nhập</button>
+            </form>
+            <div class="toggle-link" id="toggleModeBtn">Chưa có tài khoản? Đăng ký ngay</div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         GIAO DIỆN DESKTOP APP CHÍNH (HSP DRIVE)
+         ========================================= -->
+    <div id="appSection" class="hidden">
+        
+        <!-- HEADER MENU THANH ĐIỀU HƯỚNG APP DESKTOP -->
+        <div class="desktop-app-header">
+            <div class="app-brand-menu">
+                <div class="app-logo">
+                    <span>🟢</span> <span>Hsp Drive</span>
+                </div>
+                
+                <div class="app-menu-bar">
+                    <div class="menu-btn">
+                        Tệp ▾
+                        <div class="dropdown-content">
+                            <div class="dropdown-item" onclick="triggerUpload()">📤 Tải tệp lên...</div>
+                            <div class="dropdown-item" onclick="switchTab('starred')">⭐ Tệp đã lưu</div>
+                            <div class="dropdown-item" onclick="switchTab('all')">📁 Tất cả tệp</div>
+                        </div>
+                    </div>
+
+                    <div class="menu-btn">
+                        Xem ▾
+                        <div class="dropdown-content">
+                            <div class="dropdown-item" onclick="switchTab('all')">📁 Tất cả tệp</div>
+                            <div class="dropdown-item" onclick="switchTab('starred')">⭐ Được gắn sao</div>
+                            <div class="dropdown-item" onclick="switchTab('shared')">🔗 Tệp chia sẻ</div>
+                            <div class="dropdown-item" onclick="switchTab('trash')">🗑️ Thùng rác</div>
+                        </div>
+                    </div>
+
+                    <div class="menu-btn">
+                        Trợ giúp ▾
+                        <div class="dropdown-content">
+                            <div class="dropdown-item" onclick="showToast('💡 Hsp Drive Desktop App v2.0')">ℹ️ Giới thiệu Hsp Drive</div>
+                            <div class="dropdown-item" onclick="location.reload()">🔄 Làm mới ứng dụng</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ô TÌM KIẾM TỆP NHANH -->
+            <div class="header-center-search">
+                <input type="text" id="searchInput" class="search-input-box" placeholder="🔍 Tìm kiếm tệp trong Hsp Drive..." oninput="searchFiles(this.value)">
+            </div>
+
+            <!-- ĐỒNG HỒ & TÀI KHOẢN -->
+            <div class="header-user-controls">
+                <div class="user-greeting">
+                    <span>👤</span> <span id="displayUser">Admin</span>
+                </div>
+                <a href="HspDrive.exe" download="HspDrive.exe" id="downloadAppBtn" class="download-app-btn" title="Tải ứng dụng phần mềm HspDrive.exe về máy">
+                    <span>💻</span> <span>Tải App</span>
+                </a>
+                <button class="logout-app-btn" id="logoutBtn">Đăng xuất</button>
+            </div>
+        </div>
+
+        <!-- THÂN ỨNG DỤNG DESKTOP -->
+        <div class="desktop-app-body">
+            
+            <!-- CỘT ĐIỀU HƯỚNG BÊN TRÁI -->
+            <div class="app-sidebar">
+                <div>
+                    <div class="nav-section-title">DANH MỤC LƯU TRỮ</div>
+                    <div class="sidebar-item active" data-tab="all">
+                        <span>📁</span> <span>Tất cả tệp</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="starred">
+                        <span>⭐</span> <span>Được gắn sao</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="shared">
+                        <span>🔗</span> <span>Tệp chia sẻ</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="trash">
+                        <span>🗑️</span> <span>Thùng rác</span>
+                    </div>
+                </div>
+
+                <!-- THẺ BÁO DUNG LƯỢNG LƯU TRỮ -->
+                <div class="storage-status-card">
+                    <div class="storage-info">
+                        <span>Dung lượng đã dùng</span>
+                        <span id="storageText">0 MB / 15 GB</span>
+                    </div>
+                    <div class="storage-bar-bg">
+                        <div class="storage-bar-fill" id="storageBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NỘI DUNG CHÍNH QUẢN LÝ FILE -->
+            <div class="app-main-view">
+                <div class="view-header">
+                    <h2 id="sectionTitle">Kho Dữ Liệu</h2>
+                    <input type="file" id="fileInput" style="display: none;">
+                    <button class="upload-file-btn" onclick="triggerUpload()">
+                        <span>➕</span> <span>Tải tệp lên</span>
+                    </button>
+                </div>
+
+                <div class="file-grid" id="fileGrid">
+                    <!-- Render bằng JavaScript -->
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================
+         MÃ JAVASCRIPT XỬ LÝ DỮ LIỆU APP DESKTOP
+         ========================================= -->
+    <script>
+        const STORAGE_USERS_KEY = "z4rex_accounts";
+        const STORAGE_CURRENT_KEY = "z4rex_currentUser";
+
+        // Khởi tạo tài khoản và bộ nhớ tệp
+        function initData() {
+            let users = localStorage.getItem(STORAGE_USERS_KEY);
+            if (!users) {
+                let initial = {
+                    "thanhtai2512": {
+                        password: "123",
+                        email: "thanhtai2512@gmail.com",
+                        files: [
+                            { id: "1", name: "Desktop 2026.07.23 - 15.30.36.01.mp4", size: "3.6 MB", type: "video", icon: "🎬", isStarred: false, isTrash: false },
+                            { id: "2", name: "Desktop 2026.07.23 - 16.37.04.02.mp4", size: "8.9 MB", type: "video", icon: "🎬", isStarred: false, isTrash: false },
+                            { id: "3", name: "Desktop 2026.07.23 - 18.13.49.03.mp4", size: "32.6 MB", type: "video", icon: "🎬", isStarred: false, isTrash: false }
+                        ]
+                    }
+                };
+                
+                let oldAcc = localStorage.getItem("myAccount");
+                if (oldAcc) {
+                    try {
+                        let parsed = JSON.parse(oldAcc);
+                        if (parsed.username && !initial[parsed.username]) {
+                            initial[parsed.username] = {
+                                password: parsed.password || "123",
+                                email: parsed.email || "",
+                                files: []
+                            };
+                        }
+                    } catch(e) {}
+                }
+                
+                localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(initial));
+            }
+        }
+
+        initData();
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(STORAGE_USERS_KEY) || "{}");
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+        }
+
+        let currentTab = "all";
+        let searchQuery = "";
+
+        // Elements
+        const authSection = document.getElementById("authSection");
+        const appSection = document.getElementById("appSection");
+        const authForm = document.getElementById("authForm");
+        const authTitle = document.getElementById("authTitle");
+        const submitBtn = document.getElementById("submitBtn");
+        const toggleModeBtn = document.getElementById("toggleModeBtn");
+        const confirmPassGroup = document.getElementById("confirmPassGroup");
+        const confirmPassInput = document.getElementById("confirm_password");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const displayUser = document.getElementById("displayUser");
+        const fileGrid = document.getElementById("fileGrid");
+        const fileInput = document.getElementById("fileInput");
+        const sectionTitle = document.getElementById("sectionTitle");
+
+        let isLoginMode = true;
+
+        window.triggerUpload = function() {
+            fileInput.click();
+        };
+
+        window.switchTab = function(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll(".sidebar-item").forEach(m => {
+                if (m.getAttribute("data-tab") === tabName) m.classList.add("active");
+                else m.classList.remove("active");
+            });
+            renderFiles();
+        };
+
+        window.searchFiles = function(query) {
+            searchQuery = query.toLowerCase().trim();
+            renderFiles();
+        };
+
+        window.minimizeApp = function() {
+            try {
+                if (window.require) {
+                    const { ipcRenderer } = window.require('electron');
+                    if (ipcRenderer) { ipcRenderer.send('win-minimize'); return; }
+                }
+            } catch(e) {}
+
+            let appSec = document.getElementById("appSection");
+            appSec.classList.toggle("app-minimized");
+            
+            let existingDock = document.getElementById("minimizedDock");
+            if (appSec.classList.contains("app-minimized")) {
+                if (!existingDock) {
+                    let dock = document.createElement("div");
+                    dock.id = "minimizedDock";
+                    dock.className = "minimized-dock-bar";
+                    dock.onclick = window.minimizeApp;
+                    dock.innerHTML = `<span>🟢</span> <span style="font-weight:bold; color:#fff;">Hsp Drive (Đang thu nhỏ)</span> <span style="color:#27ae60; font-size:12px;">― Bấm để khôi phục</span>`;
+                    document.body.appendChild(dock);
+                }
+                showToast("🗕 Ứng dụng đã được thu nhỏ thanh Taskbar");
+            } else {
+                if (existingDock) existingDock.remove();
+                showToast("🗖 Đã khôi phục giao diện ứng dụng");
+            }
+        };
+
+        window.toggleMaximize = function() {
+            try {
+                if (window.require) {
+                    const { ipcRenderer } = window.require('electron');
+                    if (ipcRenderer) { ipcRenderer.send('win-maximize'); return; }
+                }
+            } catch(e) {}
+
+            let maxBtn = document.getElementById("maxBtn");
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    if (maxBtn) maxBtn.innerText = "🗗";
+                    showToast("🗖 Đã phóng to toàn màn hình");
+                }).catch(() => {
+                    showToast("🗖 Đã mở rộng cửa sổ ứng dụng");
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        if (maxBtn) maxBtn.innerText = "🗖";
+                        showToast("🗗 Đã khôi phục kích thước cửa sổ");
+                    }).catch(()=>{});
+                }
+            }
+        };
+
+        window.closeApp = function() {
+            try {
+                if (window.require) {
+                    const { ipcRenderer } = window.require('electron');
+                    if (ipcRenderer) { ipcRenderer.send('win-close'); return; }
+                }
+            } catch(e) {}
+
+            window.close();
+
+            setTimeout(() => {
+                let confirmExit = confirm("Bạn có chắc chắn muốn đóng và thoát khỏi ứng dụng Hsp Drive?");
+                if (confirmExit) {
+                    document.body.innerHTML = `
+                        <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#080c09; color:#27ae60; font-family:'Segoe UI', sans-serif;">
+                            <h1 style="font-size:38px; margin-bottom:10px; text-shadow: 0 0 15px rgba(39,174,96,0.6);">🟢 Hsp Drive</h1>
+                            <p style="color:#aaa; font-size:16px;">Ứng dụng đã được đóng an toàn.</p>
+                            <button onclick="location.reload()" style="margin-top:25px; padding:12px 25px; background:linear-gradient(135deg, #27ae60, #1e8449); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px; box-shadow:0 4px 15px rgba(39,174,96,0.4);">Mở Lại Ứng Dụng</button>
+                        </div>
+                    `;
+                }
+            }, 100);
+        };
+
+        // Chuyển đổi giữa Đăng Nhập & Đăng Ký
+        window.switchAuthTab = function(isLogin) {
+            isLoginMode = isLogin;
+            const tabLoginBtn = document.getElementById("tabLoginBtn");
+            const tabRegisterBtn = document.getElementById("tabRegisterBtn");
+            
+            if (isLoginMode) {
+                if (tabLoginBtn) tabLoginBtn.classList.add("active");
+                if (tabRegisterBtn) tabRegisterBtn.classList.remove("active");
+                authTitle.innerText = "Đăng Nhập";
+                submitBtn.innerText = "Đăng Nhập";
+                toggleModeBtn.innerText = "Chưa có tài khoản? Đăng ký ngay";
+                confirmPassGroup.classList.add("hidden");
+                confirmPassInput.removeAttribute("required");
+            } else {
+                if (tabRegisterBtn) tabRegisterBtn.classList.add("active");
+                if (tabLoginBtn) tabLoginBtn.classList.remove("active");
+                authTitle.innerText = "Đăng Ký";
+                submitBtn.innerText = "Đăng Ký";
+                toggleModeBtn.innerText = "Đã có tài khoản? Đăng nhập ngay";
+                confirmPassGroup.classList.remove("hidden");
+                confirmPassInput.setAttribute("required", "true");
+            }
+        };
+
+        toggleModeBtn.addEventListener("click", function() {
+            switchAuthTab(!isLoginMode);
+        });
+
+        // Form Submit
+        authForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            let user = usernameInput.value.trim();
+            let pass = passwordInput.value;
+            let users = getUsers();
+
+            if (isLoginMode) {
+                if (users[user] && users[user].password === pass) {
+                    localStorage.setItem(STORAGE_CURRENT_KEY, user);
+                    loginSuccess(user);
+                } else {
+                    alert("Tên tài khoản hoặc mật khẩu không chính xác!");
+                }
+            } else {
+                let confirmPass = confirmPassInput.value;
+                if (pass !== confirmPass) {
+                    alert("Mật khẩu xác nhận không khớp!");
+                    return;
+                }
+                if (users[user]) {
+                    alert("Tên tài khoản này đã được sử dụng! Vui lòng chọn tên khác.");
+                    return;
+                }
+                
+                users[user] = {
+                    password: pass,
+                    email: "",
+                    files: [] // Chỗ để file cho người dùng mới
+                };
+                saveUsers(users);
+                localStorage.setItem("myAccount", JSON.stringify({ username: user, password: pass }));
+
+                alert(`Đăng ký tài khoản "${user}" thành công!`);
+                toggleModeBtn.click();
+                usernameInput.value = user;
+                passwordInput.value = pass;
+            }
+        });
+
+        function loginSuccess(username) {
+            displayUser.innerText = username;
+            authSection.classList.add("hidden");
+            appSection.classList.remove("hidden");
+            renderFiles();
+        }
+
+        // Chỉ ẩn nút "Tải App" khi đang chạy trực tiếp trên phần mềm Desktop App HspDrive.exe (truyền ?mode=app)
+        function checkDesktopAppEnv() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let isDesktopApp = (urlParams.get("mode") === "app") || 
+                                (window.navigator.userAgent.includes("Electron"));
+            let downloadBtn = document.getElementById("downloadAppBtn");
+            if (downloadBtn) {
+                if (isDesktopApp) {
+                    downloadBtn.style.display = "none";
+                } else {
+                    downloadBtn.style.display = "inline-flex";
+                }
+            }
+        }
+        checkDesktopAppEnv();
+
+        let loggedUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+        if (loggedUser) {
+            let users = getUsers();
+            if (users[loggedUser]) {
+                loginSuccess(loggedUser);
+            }
+        }
+
+        document.getElementById("logoutBtn").addEventListener("click", function() {
+            localStorage.removeItem(STORAGE_CURRENT_KEY);
+            appSection.classList.add("hidden");
+            authSection.classList.remove("hidden");
+            authForm.reset();
+        });
+
+        // Sidebar Navigation
+        document.querySelectorAll(".sidebar-item").forEach((item) => {
+            item.addEventListener("click", function() {
+                document.querySelectorAll(".sidebar-item").forEach(m => m.classList.remove("active"));
+                this.classList.add("active");
+                currentTab = this.getAttribute("data-tab");
+                renderFiles();
+            });
+        });
+
+        function showToast(msg) {
+            let toast = document.createElement("div");
+            toast.className = "toast";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // Render Danh sách tệp & Cập nhật thanh dung lượng
+        function renderFiles() {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            if (!currentUser) return;
+            
+            let users = getUsers();
+            let userObj = users[currentUser] || { files: [] };
+            let files = userObj.files || [];
+
+            if (currentTab === "all") sectionTitle.innerText = "Kho Dữ Liệu - Tất Cả Tệp";
+            else if (currentTab === "starred") sectionTitle.innerText = "Kho Dữ Liệu - Được Gắn Sao (Đã Lưu)";
+            else if (currentTab === "shared") sectionTitle.innerText = "Kho Dữ Liệu - Tệp Chia Sẻ";
+            else if (currentTab === "trash") sectionTitle.innerText = "Kho Dữ Liệu - Thùng Rác";
+
+            fileGrid.innerHTML = "";
+
+            let filteredFiles = [];
+            if (currentTab === "all") {
+                filteredFiles = files.filter(f => !f.isTrash);
+            } else if (currentTab === "starred") {
+                filteredFiles = files.filter(f => !f.isTrash && f.isStarred);
+            } else if (currentTab === "shared") {
+                filteredFiles = files.filter(f => f.isShared && !f.isTrash);
+            } else if (currentTab === "trash") {
+                filteredFiles = files.filter(f => f.isTrash);
+            }
+
+            if (searchQuery !== "") {
+                filteredFiles = filteredFiles.filter(f => f.name.toLowerCase().includes(searchQuery));
+            }
+
+            // Tính tổng dung lượng
+            let totalMB = 0;
+            files.forEach(f => {
+                let sizeStr = f.size || "0 KB";
+                let num = parseFloat(sizeStr);
+                if (sizeStr.includes("MB")) totalMB += num;
+                else if (sizeStr.includes("KB")) totalMB += num / 1024;
+            });
+            document.getElementById("storageText").innerText = `${totalMB.toFixed(1)} MB / 15 GB`;
+            let percent = Math.min(100, Math.max(3, (totalMB / (15 * 1024)) * 100));
+            document.getElementById("storageBar").style.width = percent + "%";
+
+            if (filteredFiles.length === 0) {
+                let msg = "Chưa có tệp nào.";
+                if (searchQuery !== "") msg = `Không tìm thấy tệp nào phù hợp với từ khóa "${searchQuery}".`;
+                else if (currentTab === "starred") msg = "Chưa có tệp nào được gắn sao. Nhấn vào ngôi sao ★ cạnh dung lượng tệp để lưu tệp!";
+                else if (currentTab === "all") msg = `Không gian lưu trữ của "${currentUser}" đang trống. Nhấn "+ Tải tệp lên" để thêm file vào App!`;
+                else if (currentTab === "trash") msg = "Thùng rác đang trống.";
+                
+                fileGrid.innerHTML = `<div class="empty-state">${msg}</div>`;
+                return;
+            }
+
+            filteredFiles.forEach(file => {
+                let card = document.createElement("div");
+                card.className = "file-card";
+                
+                let actionButtons = "";
+                if (currentTab === "trash") {
+                    actionButtons = `
+                        <div class="action-btns">
+                            <button class="card-btn restore-btn" onclick="restoreFile('${file.id}')" title="Khôi phục tệp">↩</button>
+                            <button class="card-btn" onclick="permanentlyDeleteFile('${file.id}')" title="Xóa vĩnh viễn">✖</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = `
+                        <div class="action-btns">
+                            <button class="card-btn" onclick="moveToTrash('${file.id}')" title="Chuyển vào thùng rác">Xóa</button>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${actionButtons}
+                    <div class="file-icon">${file.icon || '📄'}</div>
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-size-row">
+                        <span class="file-size">${file.size}</span>
+                        <span class="star-btn ${file.isStarred ? 'starred' : ''}" 
+                              onclick="toggleStar('${file.id}')" 
+                              title="${file.isStarred ? 'Bỏ gắn sao (Bỏ lưu)' : 'Gắn sao (Lưu tệp này)'}">
+                            ★
+                        </span>
+                        <span class="download-btn" 
+                              onclick="downloadFile('${file.id}')" 
+                              title="Tải tệp này xuống máy">
+                            📥
+                        </span>
+                    </div>
+                `;
+                fileGrid.appendChild(card);
+            });
+        }
+
+        // Toggle Star
+        window.toggleStar = function(fileId) {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            let file = users[currentUser].files.find(f => f.id === fileId);
+            if (file) {
+                file.isStarred = !file.isStarred;
+                saveUsers(users);
+                showToast(file.isStarred ? `⭐ Đã lưu tệp "${file.name}" vào danh sách Gắn Sao` : `✨ Đã bỏ lưu tệp "${file.name}"`);
+                renderFiles();
+            }
+        };
+
+        // Download File
+        window.downloadFile = function(fileId) {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            let file = users[currentUser].files.find(f => f.id === fileId);
+            if (file) {
+                let content = file.data || `Tệp: ${file.name}\nDung lượng: ${file.size}\nLưu trữ trên ứng dụng Hsp Drive Desktop.`;
+                let blob = new Blob([content], { type: "application/octet-stream" });
+                let url = URL.createObjectURL(blob);
+                let a = document.createElement("a");
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast(`📥 Đang tải xuống tệp "${file.name}"...`);
+            }
+        };
+
+        // Move to Trash
+        window.moveToTrash = function(fileId) {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            let file = users[currentUser].files.find(f => f.id === fileId);
+            if (file) {
+                file.isTrash = true;
+                saveUsers(users);
+                showToast(`🗑️ Đã chuyển "${file.name}" vào thùng rác`);
+                renderFiles();
+            }
+        };
+
+        // Restore File
+        window.restoreFile = function(fileId) {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            let file = users[currentUser].files.find(f => f.id === fileId);
+            if (file) {
+                file.isTrash = false;
+                saveUsers(users);
+                showToast(`↩️ Đã khôi phục tệp "${file.name}"`);
+                renderFiles();
+            }
+        };
+
+        // Delete Permanently
+        window.permanentlyDeleteFile = function(fileId) {
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            users[currentUser].files = users[currentUser].files.filter(f => f.id !== fileId);
+            saveUsers(users);
+            showToast(`💥 Đã xóa vĩnh viễn tệp`);
+            renderFiles();
+        };
+
+        // Upload File
+        fileInput.addEventListener("change", function(e) {
+            if (e.target.files.length === 0) return;
+            let fileObj = e.target.files[0];
+            
+            let fileSize = (fileObj.size / 1024).toFixed(1) + " KB";
+            if (fileObj.size > 1024 * 1024) fileSize = (fileObj.size / (1024 * 1024)).toFixed(1) + " MB";
+
+            let icon = "📦";
+            if (fileObj.type.startsWith("image/")) icon = "🖼️";
+            else if (fileObj.type.startsWith("video/")) icon = "🎬";
+            else if (fileObj.type.startsWith("audio/")) icon = "🎵";
+            else if (fileObj.name.endsWith(".js") || fileObj.name.endsWith(".py") || fileObj.name.endsWith(".html")) icon = "💻";
+            else if (fileObj.type.includes("pdf") || fileObj.name.endsWith(".doc") || fileObj.name.endsWith(".txt")) icon = "📜";
+
+            let currentUser = localStorage.getItem(STORAGE_CURRENT_KEY);
+            let users = getUsers();
+            if (!users[currentUser]) return;
+
+            let newFile = {
+                id: Date.now().toString(),
+                name: fileObj.name,
+                size: fileSize,
+                icon: icon,
+                isStarred: false,
+                isTrash: false,
+                date: new Date().toLocaleDateString()
+            };
+
+            users[currentUser].files.unshift(newFile);
+            saveUsers(users);
+            showToast(`✅ Đã tải tệp "${fileObj.name}" lên chỗ lưu trữ!`);
+            this.value = "";
+            renderFiles();
+        });
+    </script>
+
+</body>
+</html>
